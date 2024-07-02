@@ -122,5 +122,24 @@ class SpringBootWebfluxApirestApplicationTests {
 		.jsonPath("$.id").isNotEmpty()
 		.jsonPath("$.nombre").isEqualTo("Impresora Epson");
 	}
+	
+	@Test
+	public void eliminar() {
+		Producto producto = service.findByNombre("Pantalla NOC").block();
+		
+		client.delete()
+		.uri("/api/v2/productos/{id}", Collections.singletonMap("id", producto.getId()))
+		.exchange()
+		.expectStatus().isNoContent()
+		.expectBody()
+		.isEmpty();
+		
+		client.get()
+		.uri("/api/v2/productos/{id}", Collections.singletonMap("id", producto.getId()))
+		.exchange()
+		.expectStatus().isNotFound()
+		.expectBody()
+		.isEmpty();
+	}
 
 }
