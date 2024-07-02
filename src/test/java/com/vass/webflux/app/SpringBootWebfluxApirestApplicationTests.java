@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import com.vass.webflux.app.models.documents.Categoria;
 import com.vass.webflux.app.models.documents.Producto;
 import com.vass.webflux.app.models.service.ProductoService;
 
@@ -57,6 +58,48 @@ class SpringBootWebfluxApirestApplicationTests {
 		.expectBody()
 		.jsonPath("$.id").isNotEmpty()
 		.jsonPath("$.nombre").isEqualTo("Impresora Epson");
+	}
+	
+	@Test
+	public void crearTest() {
+		
+		Categoria categoria = service.findCategoriaByNombre("Celulares").block();
+		
+		Producto producto = new Producto("Mesa Comedor", 20000.0, categoria);
+		
+		client.post().uri("/api/v2/productos")
+		.contentType(MediaType.APPLICATION_JSON)
+		.accept(MediaType.APPLICATION_JSON)
+		.body(Mono.just(producto), Producto.class)
+		.exchange()
+		.expectStatus().isCreated()
+		.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		.expectBody()
+		.jsonPath("$.id").isNotEmpty()
+		.jsonPath("$.nombre").isEqualTo("Mesa Comedor");
+	}
+	
+	@Test
+	public void crearDosTest() {
+		
+		Categoria categoria = service.findCategoriaByNombre("Celulares").block();
+		
+		Producto producto = new Producto("Mesa Comedor", 20000.0, categoria);
+		
+		client.post().uri("/api/v2/productos")
+		.contentType(MediaType.APPLICATION_JSON)
+		.accept(MediaType.APPLICATION_JSON)
+		.body(Mono.just(producto), Producto.class)
+		.exchange()
+		.expectStatus().isCreated()
+		.expectHeader().contentType(MediaType.APPLICATION_JSON)
+		.expectBody(Producto.class)
+		.consumeWith(response ->{
+			Producto p = response.getResponseBody();
+			Assertions.assertThat(p.getId()).isNotEmpty();
+			Assertions.assertThat(p.getNombre()).isEqualTo("Mesa Comedor");
+			Assertions.assertThat(p.getCategoria().getNombre()).isEqualTo("Celulares");
+		});
 	}
 
 }
