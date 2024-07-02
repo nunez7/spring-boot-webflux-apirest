@@ -26,5 +26,7 @@ public interface ProductoService {
 	public Mono<Categoria> findCategorieById(String id);
 	
 	public Mono<Categoria> saveCategorie(Categoria categoria);
+	
+	public Mono<Producto> findByNombre(String nombre);
 
 }
